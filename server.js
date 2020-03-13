@@ -2,7 +2,7 @@ const express = require("express");
 const graphqlHTTP = require("express-graphql");
 const { buildSchema } = require("graphql");
 const mongoose = require("mongoose");
-const Event = require("./models/event");
+const Event = require("./models/Event");
 
 const app = express();
 
