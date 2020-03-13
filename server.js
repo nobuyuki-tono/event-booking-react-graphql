@@ -9,8 +9,6 @@ const User = require("./models/User");
 
 const app = express();
 
-const events = [];
-
 app.use(express.json());
 
 app.use(
@@ -80,13 +78,30 @@ app.use(
           title: args.eventInput.title,
           description: args.eventInput.description,
           price: +args.eventInput.price,
-          date: new Date(args.eventInput.date)
+          date: new Date(args.eventInput.date),
+          creator: "5e6c0c49d2a1fc0cdb76086e"
         });
+        let createdEvent;
         return event
           .save()
           .then(result => {
+            createdEvent = result;
+            return User.findById("5e6c0c49d2a1fc0cdb76086e");
             console.log(result);
-            return { ...result._doc };
+            return result;
+          })
+          .then(user => {
+            if (!user) {
+              throw new Error("User not found");
+            }
+
+            console.log("@@@@", user);
+
+            user.createdEvents.push(event);
+            return user.save();
+          })
+          .then(result => {
+            return createdEvent;
           })
           .catch(err => {
             console.log(err);
@@ -95,11 +110,18 @@ app.use(
       },
 
       createUser: args => {
-        return bcrypt
-          .hash(args.userInput.password, 12)
+        return User.findOne({ email: args.userInput.email })
+          .then(user => {
+            if (user) {
+              throw new Error("User exists already.");
+            }
+
+            return bcrypt.hash(args.userInput.password, 12);
+          })
+
           .then(hasshedPassword => {
             const user = new User({
-              eamil: args.userInput.email,
+              email: args.userInput.email,
               password: hasshedPassword
             });
             return user.save();
