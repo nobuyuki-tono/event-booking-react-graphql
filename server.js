@@ -1,6 +1,7 @@
 const express = require("express");
 const graphqlHTTP = require("express-graphql");
 const { buildSchema } = require("graphql");
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -61,6 +62,19 @@ app.use(
   })
 );
 
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
-});
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@contactkeeper-ty6y0.mongodb.net/test?retryWrites=true&w=majority`,
+    {
+      useUnifiedTopology: true,
+      useNewUrlParser: true
+    }
+  )
+  .then(() => {
+    app.listen(5000, () => {
+      console.log("Server is running on port 5000 and Connected DB");
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  });
